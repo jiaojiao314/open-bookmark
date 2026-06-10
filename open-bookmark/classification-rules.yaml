@@ -1,0 +1,152 @@
+# 书签分类规则
+# 由 open-bookmark 自动生成
+# 共 14 条规则
+
+# 1. 博客集中管理
+- name: blogs-centralized
+  match:
+    domain:
+      - "*.www.cnblogs.com"
+      - "*.blog.csdn.net"
+      - "*.www.jianshu.com"
+      - "*.blog.51cto.com"
+      - "*.www.fly63.com"
+      - "*.www.zxgj.cn"
+      - "*.zhuanlan.zhihu.com"
+      - "*.my.oschina.net"
+      - "*.www.zhihu.com"
+      - "*.segmentfault.com"
+  action: move
+  target: 博客文章
+  reason: 博客集中管理
+  source: generated
+
+# 2. DevOps 工具书签
+- name: devops-tools
+  match:
+    domain:
+      - kubernetes.io
+  action: move
+  target: 运维工具
+  reason: DevOps 工具书签
+  source: generated
+
+# 3. GitHub 项目书签
+- name: github
+  match:
+    domain:
+      - github.com
+      - "*.github.com"
+  action: move
+  target: GitHub
+  reason: GitHub 项目书签
+  source: generated
+
+# 4. 关键词: linux (92 次)
+- name: keyword-linux
+  match:
+    title_contains:
+      - linux
+  action: move
+  target: 运维工具
+  reason: "关键词: linux (92 次)"
+  source: generated
+
+# 5. 关键词: kubernetes (84 次)
+- name: keyword-kubernetes
+  match:
+    title_contains:
+      - kubernetes
+  action: move
+  target: 运维工具
+  reason: "关键词: kubernetes (84 次)"
+  source: generated
+
+# 6. 关键词: csdn (75 次)
+- name: keyword-csdn
+  match:
+    title_contains:
+      - csdn
+  action: move
+  target: 99-人工待确认
+  reason: "关键词: csdn (75 次)"
+  source: generated
+
+# 7. 关键词: docker (43 次)
+- name: keyword-docker
+  match:
+    title_contains:
+      - docker
+  action: move
+  target: 运维工具
+  reason: "关键词: docker (43 次)"
+  source: generated
+
+# 8. 关键词: ai (33 次)
+- name: keyword-ai
+  match:
+    title_contains:
+      - ai
+  action: move
+  target: AI 工具
+  reason: "关键词: ai (33 次)"
+  source: generated
+
+# 9. 关键词: com (32 次)
+- name: keyword-com
+  match:
+    title_contains:
+      - com
+  action: move
+  target: 99-人工待确认
+  reason: "关键词: com (32 次)"
+  source: generated
+
+# 10. 关键词: python (27 次)
+- name: keyword-python
+  match:
+    title_contains:
+      - python
+  action: move
+  target: 编程语言
+  reason: "关键词: python (27 次)"
+  source: generated
+
+# 11. 关键词: mac (27 次)
+- name: keyword-mac
+  match:
+    title_contains:
+      - mac
+  action: move
+  target: 99-人工待确认
+  reason: "关键词: mac (27 次)"
+  source: generated
+
+# 12. 关键词: k8s (25 次)
+- name: keyword-k8s
+  match:
+    title_contains:
+      - k8s
+  action: move
+  target: 运维工具
+  reason: "关键词: k8s (25 次)"
+  source: generated
+
+# 13. 关键词: go (24 次)
+- name: keyword-go
+  match:
+    title_contains:
+      - go
+  action: move
+  target: 编程语言
+  reason: "关键词: go (24 次)"
+  source: generated
+
+# 14. 未匹配规则的书签
+- name: catch-all
+  match:
+    match_all: true
+  action: move
+  target: 99-人工待确认
+  reason: 未匹配规则的书签
+  source: generated

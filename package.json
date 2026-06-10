@@ -1,0 +1,29 @@
+{
+  "name": "open-bookmark",
+  "version": "0.1.0",
+  "description": "Spec-driven browser bookmark management. Define your rules first, then execute.",
+  "type": "module",
+  "bin": {
+    "open-bookmark": "./bin/open-bookmark.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest"
+  },
+  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill"],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^14.0.0",
+    "@inquirer/prompts": "^8.4.3",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.2.0",
+    "vitest": "^4.1.6"
+  }
+}

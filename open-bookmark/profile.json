@@ -1,0 +1,20 @@
+{
+  "role": "DevOps Engineer",
+  "techStack": [
+    "Kubernetes",
+    "Docker"
+  ],
+  "interests": [
+    "AI",
+    "LLM",
+    "Open Source"
+  ],
+  "language": "mixed",
+  "preferences": {
+    "blogStrategy": "集中",
+    "protectedPaths": [],
+    "catchAllTarget": "99-人工待确认"
+  },
+  "confirmed": true,
+  "confirmedAt": "2026-06-10T14:25:34.284Z"
+}
