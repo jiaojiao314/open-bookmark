@@ -1,21 +1,38 @@
 {
   "name": "open-bookmark",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Spec-driven browser bookmark management. Define your rules first, then execute.",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
     "open-bookmark": "./bin/open-bookmark.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill"],
+  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill", "bookmark-management"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiaojiao314/open-bookmark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jiaojiao314/open-bookmark/issues"
+  },
+  "homepage": "https://github.com/jiaojiao314/open-bookmark#readme",
   "dependencies": {
     "commander": "^14.0.0",
     "@inquirer/prompts": "^8.4.3",

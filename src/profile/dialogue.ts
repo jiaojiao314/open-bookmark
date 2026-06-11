@@ -165,11 +165,24 @@ async function selectProtectedPaths(folders: FolderInfo[]): Promise<string[]> {
     return []
   }
 
-  const choices = folders.map(f => ({
+  // Filter out root folders (Chrome's top-level folders)
+  const ROOT_FOLDERS = new Set(['书签栏', 'Bookmarks Bar', 'Other Bookmarks', '其他书签', 'Mobile Bookmarks', '移动设备书签'])
+  
+  const subFolders = folders.filter(f => !ROOT_FOLDERS.has(f.name))
+  
+  if (subFolders.length === 0) {
+    console.log('\n⚠️  没有子文件夹可供保护，跳过此步骤')
+    return []
+  }
+
+  const choices = subFolders.map(f => ({
     name: `${f.name} (${f.count} 个书签)`,
     value: f.name,
     checked: false
   }))
+
+  console.log('\n💡 提示: "保护文件夹"是指这些文件夹内的书签不会被移动。')
+  console.log('   选择你认为已经整理好、不需要调整的文件夹。\n')
 
   return await checkbox({
     message: '选择绝对不能动的文件夹 (空格选择，回车确认):',
