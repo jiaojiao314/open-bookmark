@@ -2,9 +2,30 @@
  * Rule generator - generates classification rules from analysis and profile
  */
 
-import type { AnalysisResult, DomainInfo } from '../analyzer/analyzer.js'
+import type { AnalysisResult, DomainInfo, KeywordInfo } from '../analyzer/analyzer.js'
 import type { UserProfile } from '../profile/types.js'
 import type { Rule, MatchCondition } from './types.js'
+
+/** Stopwords - generic words that should not generate rules */
+const STOPWORDS = new Set([
+  // Common TLDs and protocols
+  'com', 'cn', 'org', 'net', 'io', 'co', 'me', 'cc',
+  'http', 'https', 'www', 'html', 'php', 'asp', 'aspx',
+  // Common blog platforms (too generic)
+  'csdn', 'cnblogs', 'jianshu', 'zhihu', 'baidu',
+  // Common short words
+  'the', 'and', 'for', 'with', 'from', 'this', 'that',
+  '使用', '配置', '教程', '学习', '笔记', '问题'
+])
+
+/** Minimum keyword length to generate a rule */
+const MIN_KEYWORD_LENGTH = 3
+
+/** Minimum keyword count to generate a rule */
+const MIN_KEYWORD_COUNT = 5
+
+/** Minimum domain count to generate a domain cluster rule */
+const DOMAIN_CLUSTER_THRESHOLD = 10
 
 /** Generated rule collection with metadata */
 export interface GeneratedRules {
@@ -73,10 +94,14 @@ function generateProtectedRules(profile: UserProfile): Rule[] {
 function generateDomainRules(analysis: AnalysisResult, profile: UserProfile): Rule[] {
   const rules: Rule[] = []
 
-  // Group domains by category
-  const blogDomains = analysis.patterns.blogDomains.map(d => d.domain)
+  // Group domains by category, only include domains with enough bookmarks
+  const blogDomains = analysis.patterns.blogDomains
+    .filter(d => d.count >= DOMAIN_CLUSTER_THRESHOLD)
+    .map(d => d.domain)
   const aiDomains = getDomainsByCategory(analysis, ['openai.com', 'claude.ai', 'deepseek.com', 'chatglm.cn'])
+    .filter(d => analysis.domains.find(ad => ad.domain === d)?.count ?? 0 >= DOMAIN_CLUSTER_THRESHOLD)
   const devopsDomains = getDomainsByCategory(analysis, ['kubernetes.io', 'docker.com', 'helm.sh', 'istio.io'])
+    .filter(d => analysis.domains.find(ad => ad.domain === d)?.count ?? 0 >= DOMAIN_CLUSTER_THRESHOLD)
 
   // Blog rules
   if (blogDomains.length > 0) {
@@ -137,8 +162,8 @@ function generateDomainRules(analysis: AnalysisResult, profile: UserProfile): Ru
     })
   }
 
-  // GitHub
-  if (analysis.patterns.githubCount > 10) {
+  // GitHub - only if enough bookmarks
+  if (analysis.patterns.githubCount >= DOMAIN_CLUSTER_THRESHOLD) {
     rules.push({
       name: 'github',
       match: {
@@ -154,29 +179,37 @@ function generateDomainRules(analysis: AnalysisResult, profile: UserProfile): Ru
   return rules
 }
 
+/** Filter keywords - remove stopwords and too-short words */
+function filterKeywords(keywords: KeywordInfo[]): KeywordInfo[] {
+  return keywords.filter(kw => 
+    kw.keyword.length >= MIN_KEYWORD_LENGTH &&
+    !STOPWORDS.has(kw.keyword.toLowerCase()) &&
+    kw.count >= MIN_KEYWORD_COUNT
+  )
+}
+
 /** Generate keyword-based rules */
 function generateKeywordRules(analysis: AnalysisResult, profile: UserProfile): Rule[] {
   const rules: Rule[] = []
 
-  // Use top keywords to create rules
-  const topKeywords = analysis.keywords.slice(0, 10)
+  // Filter keywords before generating rules
+  const filteredKeywords = filterKeywords(analysis.keywords)
+  const topKeywords = filteredKeywords.slice(0, 10)
 
   for (const kw of topKeywords) {
-    if (kw.count >= 5) {
-      // Infer target folder from keyword
-      const target = inferFolderFromKeyword(kw.keyword, profile)
+    // Infer target folder from keyword
+    const target = inferFolderFromKeyword(kw.keyword, profile)
 
-      rules.push({
-        name: `keyword-${kw.keyword}`,
-        match: {
-          titleContains: [kw.keyword]
-        },
-        action: 'move',
-        target,
-        reason: `关键词: ${kw.keyword} (${kw.count} 次)`,
-        source: 'generated'
-      })
-    }
+    rules.push({
+      name: `keyword-${kw.keyword}`,
+      match: {
+        titleContains: [kw.keyword]
+      },
+      action: 'move',
+      target,
+      reason: `关键词: ${kw.keyword} (${kw.count} 次)`,
+      source: 'generated'
+    })
   }
 
   return rules

@@ -15,6 +15,9 @@ import { generateRules, validateRules } from '../rules/generator.js'
 import { saveRules, loadRules } from '../rules/serializer.js'
 import { preview, apply, verify, createBackup, loadBackup } from '../executor/executor.js'
 import { StateManager, stateFileExists } from '../state/manager.js'
+import { configCommand } from '../commands/config.js'
+import { proposeCommand } from '../commands/propose.js'
+import { skillCommand } from '../commands/skill.js'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
@@ -589,6 +592,74 @@ program
 
     } catch (error) {
       console.error('❌ 分析失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// config command
+// ============================================
+program
+  .command('config')
+  .description('View and modify user profile')
+  .option('--show', 'Show current profile')
+  .option('--set <field>', 'Set a field value')
+  .option('--value <value>', 'Value for --set option')
+  .option('--add <field>', 'Add value to array field')
+  .option('--remove <field>', 'Remove value from array field')
+  .action(async (options) => {
+    try {
+      await configCommand(options)
+    } catch (error) {
+      console.error('❌ 配置失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// propose command
+// ============================================
+program
+  .command('propose')
+  .description('Scan new bookmarks and generate incremental rules')
+  .option('--dry-run', 'Dry run, do not save')
+  .option('--profile <name>', 'Chrome profile to use')
+  .action(async (options) => {
+    try {
+      await proposeCommand(options)
+    } catch (error) {
+      console.error('❌ 增量规则生成失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// skill command
+// ============================================
+const skillCmd = program
+  .command('skill')
+  .description('Generate and install SKILL.md for AI platforms')
+
+skillCmd
+  .command('install')
+  .description('Install SKILL.md to detected platforms')
+  .action(async () => {
+    try {
+      await skillCommand({ install: true })
+    } catch (error) {
+      console.error('❌ SKILL.md 安装失败:', error)
+      process.exit(1)
+    }
+  })
+
+skillCmd
+  .command('show')
+  .description('Show SKILL.md content')
+  .action(async () => {
+    try {
+      await skillCommand({ show: true })
+    } catch (error) {
+      console.error('❌ SKILL.md 显示失败:', error)
       process.exit(1)
     }
   })

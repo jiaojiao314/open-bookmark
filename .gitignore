@@ -1,0 +1,7 @@
+node_modules/
+dist/
+open-bookmark/
+*.js.map
+.DS_Store
+.opencode/
+openspec/
