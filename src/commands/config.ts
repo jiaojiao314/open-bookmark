@@ -178,7 +178,7 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
       domains: [],
       folders: [],
       keywords: [],
-      patterns: { internalCount: 0, githubCount: 0, blogCount: 0, blogDomains: [], aiCount: 0, devopsCount: 0 },
+      patterns: { internalCount: 0, githubCount: 0, blogCount: 0, blogDomains: [], aiCount: 0, devopsCount: 0, codeCount: 0, docCount: 0 },
       orphanCount: 0,
       folderDomains: {}
     })

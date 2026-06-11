@@ -18,7 +18,15 @@ import { StateManager, stateFileExists } from '../state/manager.js'
 import { configCommand } from '../commands/config.js'
 import { proposeCommand } from '../commands/propose.js'
 import { skillCommand } from '../commands/skill.js'
+import { prepareCommand } from '../commands/prepare.js'
+import { rulesCommand } from '../commands/rules.js'
+import { statsCommand } from '../commands/stats.js'
+import { pipelineCommand } from '../commands/pipeline.js'
+import { evaluateCommand } from '../commands/evaluate.js'
+import { feedbackCommand } from '../commands/feedback.js'
+import { optimizeCommand } from '../commands/optimize.js'
 import { showLogo, showDisclaimer, showBackupNotice } from '../ui/logo.js'
+import { graphInit, graphUpdate, graphQuery, graphStats, graphExport, graphRules, graphTour, graphClassify } from '../graph/commands.js'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
@@ -695,6 +703,288 @@ skillCmd
       await skillCommand({ show: true })
     } catch (error) {
       console.error('❌ SKILL.md 显示失败:', error)
+      process.exit(1)
+    }
+  })
+
+skillCmd
+  .command('generate')
+  .description('Generate SKILL.md to local directory')
+  .action(async () => {
+    try {
+      await skillCommand({ generate: true })
+    } catch (error) {
+      console.error('❌ SKILL.md 生成失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// graph command
+// ============================================
+const graphCmd = program
+  .command('graph')
+  .description('Knowledge graph operations')
+
+graphCmd
+  .command('init')
+  .description('Initialize knowledge graph')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      const manager = createStateManager(program.opts())
+      const state = await manager.load()
+
+      // Load bookmarks
+      const { readFile } = await import('node:fs/promises')
+      const bookmarksData = await readFile(state.bookmarks.snapshot, 'utf-8')
+      const bookmarks = JSON.parse(bookmarksData).map((b: Record<string, unknown>) => ({
+        ...b,
+        dateAdded: new Date(b.dateAdded as string),
+        dateModified: new Date(b.dateModified as string)
+      }))
+
+      await graphInit(bookmarks, { stateDir })
+    } catch (error) {
+      console.error('❌ 知识图谱初始化失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('update')
+  .description('Update knowledge graph')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      const manager = createStateManager(program.opts())
+      const state = await manager.load()
+
+      // Load bookmarks
+      const { readFile } = await import('node:fs/promises')
+      const bookmarksData = await readFile(state.bookmarks.snapshot, 'utf-8')
+      const bookmarks = JSON.parse(bookmarksData).map((b: Record<string, unknown>) => ({
+        ...b,
+        dateAdded: new Date(b.dateAdded as string),
+        dateModified: new Date(b.dateModified as string)
+      }))
+
+      await graphUpdate(bookmarks, { stateDir })
+    } catch (error) {
+      console.error('❌ 知识图谱更新失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('query <keyword>')
+  .description('Query knowledge graph')
+  .action(async (keyword: string) => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphQuery(keyword, { stateDir })
+    } catch (error) {
+      console.error('❌ 知识图谱查询失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('stats')
+  .description('Show knowledge graph statistics')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphStats({ stateDir })
+    } catch (error) {
+      console.error('❌ 知识图谱统计失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('export')
+  .description('Export knowledge graph')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphExport({ stateDir })
+    } catch (error) {
+      console.error('❌ 知识图谱导出失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('rules')
+  .description('Generate rules from knowledge graph')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphRules({ stateDir })
+    } catch (error) {
+      console.error('❌ 规则生成失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('tour')
+  .description('Show learning path')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphTour({ stateDir })
+    } catch (error) {
+      console.error('❌ 学习路径显示失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('classify')
+  .description('Classify bookmarks using knowledge graph')
+  .action(async () => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      const manager = createStateManager(program.opts())
+      const state = await manager.load()
+
+      // Load bookmarks
+      const { readFile } = await import('node:fs/promises')
+      const bookmarksData = await readFile(state.bookmarks.snapshot, 'utf-8')
+      const bookmarks = JSON.parse(bookmarksData).map((b: Record<string, unknown>) => ({
+        ...b,
+        dateAdded: new Date(b.dateAdded as string),
+        dateModified: new Date(b.dateModified as string)
+      }))
+
+      await graphClassify(bookmarks, { stateDir })
+    } catch (error) {
+      console.error('❌ 书签分类失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// prepare command
+// ============================================
+program
+  .command('prepare')
+  .description('Prepare bookmark data for AI analysis')
+  .option('--format <format>', 'Output format: ai-ready, domains, keywords', 'ai-ready')
+  .option('--sample <n>', 'Limit sample size', parseInt)
+  .action(async (options) => {
+    try {
+      await prepareCommand(options)
+    } catch (error) {
+      console.error('❌ 数据准备失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// rules command
+// ============================================
+program
+  .command('rules')
+  .description('Convert AI-generated tags to rules')
+  .requiredOption('--from <file>', 'AI tags JSON file')
+  .option('--merge', 'Merge with existing rules')
+  .action(async (options) => {
+    try {
+      await rulesCommand(options)
+    } catch (error) {
+      console.error('❌ 规则生成失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// stats command
+// ============================================
+program
+  .command('stats')
+  .description('Output bookmark statistics for AI')
+  .option('--domains', 'Domain statistics')
+  .option('--keywords', 'Keyword statistics')
+  .option('--patterns', 'Pattern statistics')
+  .action(async (options) => {
+    try {
+      await statsCommand(options)
+    } catch (error) {
+      console.error('❌ 统计失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// pipeline command
+// ============================================
+program
+  .command('pipeline')
+  .description('Run multi-agent analysis pipeline')
+  .option('--enhanced', 'Use enhanced pipeline with hierarchical classification')
+  .option('--json', 'Output as JSON')
+  .option('--output <file>', 'Save output to file')
+  .action(async (options) => {
+    try {
+      await pipelineCommand(options)
+    } catch (error) {
+      console.error('❌ 流水线失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// evaluate command
+// ============================================
+program
+  .command('evaluate')
+  .description('Evaluate classification quality')
+  .option('--enhanced', 'Use enhanced evaluation with hierarchical support')
+  .option('--json', 'Output as JSON')
+  .action(async (options) => {
+    try {
+      await evaluateCommand(options)
+    } catch (error) {
+      console.error('❌ 评估失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// feedback command
+// ============================================
+program
+  .command('feedback')
+  .description('Manage user feedback')
+  .option('--add <entry>', 'Add feedback (id:name:from:to:reason)')
+  .option('--list', 'List pending feedback')
+  .option('--apply <id>', 'Mark feedback as applied')
+  .option('--report', 'Generate feedback report')
+  .action(async (options) => {
+    try {
+      await feedbackCommand(options)
+    } catch (error) {
+      console.error('❌ 反馈操作失败:', error)
+      process.exit(1)
+    }
+  })
+
+// ============================================
+// optimize command
+// ============================================
+program
+  .command('optimize')
+  .description('Run optimization cycle')
+  .option('--apply', 'Apply optimizations')
+  .option('--json', 'Output as JSON')
+  .action(async (options) => {
+    try {
+      await optimizeCommand(options)
+    } catch (error) {
+      console.error('❌ 优化失败:', error)
       process.exit(1)
     }
   })

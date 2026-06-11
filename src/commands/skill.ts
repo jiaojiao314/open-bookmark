@@ -10,6 +10,7 @@ import { saveSkillForPlatform } from '../platforms/skill.js'
 export interface SkillOptions {
   install?: boolean
   show?: boolean
+  generate?: boolean
 }
 
 /** Run skill command */
@@ -21,6 +22,23 @@ export async function skillCommand(options: SkillOptions): Promise<void> {
     const { generateSkillContent } = await import('../platforms/skill.js')
     const content = generateSkillContent()
     console.log(content)
+    return
+  }
+  
+  // Generate SKILL.md to local directory
+  if (options.generate) {
+    const { writeFile, mkdir } = await import('node:fs/promises')
+    const { join } = await import('node:path')
+    const { generateSkillContent } = await import('../platforms/skill.js')
+    
+    const skillDir = join(rootDir, '.opencode', 'skills', 'bookmark')
+    const skillPath = join(skillDir, 'SKILL.md')
+    
+    await mkdir(skillDir, { recursive: true })
+    const content = generateSkillContent()
+    await writeFile(skillPath, content, 'utf-8')
+    
+    console.log(`✅ SKILL.md 已生成: ${skillPath}`)
     return
   }
   
@@ -62,6 +80,7 @@ export async function skillCommand(options: SkillOptions): Promise<void> {
   
   // Default: show help
   console.log('用法:')
-  console.log('  open-bookmark skill install  # 安装 SKILL.md 到各平台')
-  console.log('  open-bookmark skill show     # 显示 SKILL.md 内容')
+  console.log('  open-bookmark skill install   # 安装 SKILL.md 到各平台')
+  console.log('  open-bookmark skill show      # 显示 SKILL.md 内容')
+  console.log('  open-bookmark skill generate  # 生成 SKILL.md 到本地目录')
 }

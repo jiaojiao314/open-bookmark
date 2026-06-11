@@ -2,6 +2,8 @@
  * Rule type definitions for open-bookmark
  */
 
+import { extractDomain } from '../chrome/types.js'
+
 /** Match condition for rules */
 export interface MatchCondition {
   domain?: string[]
@@ -99,21 +101,6 @@ function matchDomain(pattern: string, domain: string): boolean {
     return domain.endsWith(suffix) || domain === pattern.slice(2)
   }
   return false
-}
-
-/** Extract domain from URL (local helper) */
-function extractDomain(url: string): string {
-  try {
-    const parsed = new URL(url)
-    const host = parsed.hostname
-    if (!host) return ''
-    if (parsed.port && /^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-      return `${host}:${parsed.port}`
-    }
-    return host
-  } catch {
-    return ''
-  }
 }
 
 /** Find first matching rule for a bookmark */

@@ -4,6 +4,7 @@
 
 import type { Bookmark } from '../chrome/types.js'
 import { extractDomain, getTopFolder, isInternalURL } from '../chrome/types.js'
+import { BLOG_DOMAINS, AI_DOMAINS, DEVOPS_DOMAINS, DOC_DOMAINS, CODE_DOMAINS } from '../config/domains.js'
 
 /** Analysis result */
 export interface AnalysisResult {
@@ -50,33 +51,9 @@ export interface PatternInfo {
   blogDomains: DomainInfo[]
   aiCount: number
   devopsCount: number
+  codeCount: number
+  docCount: number
 }
-
-/** Known domain patterns */
-const BLOG_DOMAINS = [
-  'csdn.net', 'cnblogs.com', 'jianshu.com', 'zhihu.com',
-  '51cto.com', 'juejin.im', 'segmentfault.com', 'oschina.net',
-  'fly63.com', 'zxgj.cn'
-]
-
-const AI_DOMAINS = [
-  'openai.com', 'claude.ai', 'deepseek.com', 'chatglm.cn',
-  'tongyi.aliyun.com', 'doubao.com', 'metaso.cn', 'kimi.com',
-  'minimaxi.com', 'baichuan-ai.com', 'xfyun.cn', 'baidu.com',
-  'siliconflow.cn', 'manus.im'
-]
-
-const DEVOPS_DOMAINS = [
-  'kubernetes.io', 'docker.com', 'helm.sh', 'istio.io',
-  'envoyproxy.io', 'prometheus.io', 'grafana.com', 'grafana.org',
-  'elastic.co', 'ansible.com', 'terraform.io', 'fluentd.org',
-  'fluentbit.io', 'cert-manager.io'
-]
-
-const DOC_DOMAINS = [
-  'yuque.com', 'notion.so', 'confluence.atlassian.com',
-  'docs.google.com', 'feishu.cn', 'dingtalk.com'
-]
 
 /** Analyze bookmarks */
 export function analyze(bookmarks: Bookmark[]): AnalysisResult {
@@ -224,6 +201,8 @@ function detectPatterns(bookmarks: Bookmark[], domainCounts: Map<string, number>
   let blogCount = 0
   let aiCount = 0
   let devopsCount = 0
+  let codeCount = 0
+  let docCount = 0
   
   for (const b of bookmarks) {
     const domain = extractDomain(b.url)
@@ -234,6 +213,8 @@ function detectPatterns(bookmarks: Bookmark[], domainCounts: Map<string, number>
     if (BLOG_DOMAINS.some(d => domain.includes(d))) blogCount++
     if (AI_DOMAINS.some(d => domain.includes(d))) aiCount++
     if (DEVOPS_DOMAINS.some(d => domain.includes(d))) devopsCount++
+    if (CODE_DOMAINS.some(d => domain.includes(d))) codeCount++
+    if (DOC_DOMAINS.some(d => domain.includes(d))) docCount++
   }
   
   // Blog domains breakdown
@@ -251,6 +232,8 @@ function detectPatterns(bookmarks: Bookmark[], domainCounts: Map<string, number>
     blogCount,
     blogDomains: sortedDomainInfos(blogDomainCounts, 10),
     aiCount,
-    devopsCount
+    devopsCount,
+    codeCount,
+    docCount
   }
 }
