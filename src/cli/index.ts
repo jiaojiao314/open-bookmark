@@ -18,6 +18,7 @@ import { StateManager, stateFileExists } from '../state/manager.js'
 import { configCommand } from '../commands/config.js'
 import { proposeCommand } from '../commands/propose.js'
 import { skillCommand } from '../commands/skill.js'
+import { showLogo, showDisclaimer, showBackupNotice } from '../ui/logo.js'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
@@ -53,6 +54,10 @@ program
   .option('--profile <name>', 'Chrome profile to use')
   .action(async (options) => {
     try {
+      // Show logo and disclaimer
+      showLogo()
+      showDisclaimer()
+
       const stateDir = getStateDir(program.opts())
       const manager = createStateManager(program.opts())
 
@@ -272,6 +277,8 @@ program
   .description('Preview rule execution effects')
   .action(async () => {
     try {
+      showLogo()
+
       const stateDir = getStateDir(program.opts())
       const manager = createStateManager(program.opts())
 
@@ -294,14 +301,27 @@ program
       console.log(`   ${rules.length} 条规则`)
 
       // Preview
-      console.log('\n🔍 预览效果...')
+      console.log('\n🔍 匹配过程...')
       const result = preview(bookmarks, rules)
 
-      console.log('\n📊 预览结果:')
+      // Show match statistics
+      console.log('\n📊 匹配统计:')
       console.log(`   总书签数: ${result.totalBookmarks}`)
-      console.log(`   匹配书签: ${result.matchedBookmarks}`)
+      console.log(`   匹配书签: ${result.matchedBookmarks} (${(result.matchedBookmarks / result.totalBookmarks * 100).toFixed(1)}%)`)
       console.log(`   未匹配: ${result.unmatchedBookmarks}`)
 
+      // Show rule matches
+      console.log('\n📋 规则匹配详情:')
+      const ruleMatches = new Map<string, number>()
+      for (const move of result.moves) {
+        const count = ruleMatches.get(move.ruleName) || 0
+        ruleMatches.set(move.ruleName, count + 1)
+      }
+      for (const [ruleName, count] of ruleMatches.entries()) {
+        console.log(`   ${ruleName}: ${count} 个书签`)
+      }
+
+      // Show conflicts
       if (result.conflicts.length > 0) {
         console.log(`\n⚠️  冲突 (${result.conflicts.length}):`)
         for (const conflict of result.conflicts.slice(0, 5)) {
@@ -312,7 +332,19 @@ program
         }
       }
 
-      console.log('\n📋 移动计划 (前 10 个):')
+      // Show new directory structure
+      console.log('\n📁 新目录结构:')
+      const targetFolders = new Map<string, number>()
+      for (const move of result.moves) {
+        const count = targetFolders.get(move.targetFolder) || 0
+        targetFolders.set(move.targetFolder, count + 1)
+      }
+      for (const [folder, count] of targetFolders.entries()) {
+        console.log(`   ${folder}/ (${count} 个书签)`)
+      }
+
+      // Show sample moves
+      console.log('\n📋 移动示例 (前 10 个):')
       for (const move of result.moves.slice(0, 10)) {
         console.log(`   ${move.bookmarkName}`)
         console.log(`     ${move.currentFolder} → ${move.targetFolder}`)
@@ -336,6 +368,9 @@ program
   .option('--dry-run', 'Dry run, do not actually modify')
   .action(async (options) => {
     try {
+      showLogo()
+      showBackupNotice()
+
       const stateDir = getStateDir(program.opts())
       const manager = createStateManager(program.opts())
 
