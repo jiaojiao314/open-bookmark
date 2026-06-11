@@ -1,6 +1,6 @@
 {
   "name": "open-bookmark",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Spec-driven browser bookmark management. Define your rules first, then execute.",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,7 +12,8 @@
     "dist",
     "bin",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs"
   ],
   "engines": {
     "node": ">=20"
@@ -23,7 +24,7 @@
     "test": "vitest",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill", "bookmark-management"],
+  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill", "bookmark-management", "classification", "multi-agent"],
   "license": "MIT",
   "repository": {
     "type": "git",
