@@ -1,5 +1,9 @@
 # open-bookmark
 
+<p align="left">
+  <a href="README.md">English</a> | <a href="READMEs/README.zh-CN.md">简体中文</a>
+</p>
+
 Spec-driven browser bookmark management. Define your rules first, then execute.
 
 ## Features
@@ -171,6 +175,22 @@ open-bookmark apply
 | `feedback` | Manage user feedback |
 | `optimize` | Run optimization cycle |
 
+## Knowledge Graph
+
+Build a knowledge graph of your bookmarks and explore it as an interactive,
+self-contained HTML dashboard (works offline, no server required):
+
+```bash
+# Build the graph
+open-bookmark graph init
+
+# Generate a self-contained HTML dashboard
+open-bookmark graph dashboard
+
+# Custom output path
+open-bookmark graph dashboard --output my-graph.html
+```
+
 ## Rule Format
 
 Rules are stored in YAML format with match conditions:
@@ -209,16 +229,26 @@ Rules are stored in YAML format with match conditions:
 
 ## AI Platform Integration
 
-open-bookmark supports SKILL.md generation for AI platforms:
+open-bookmark supports SKILL.md generation for major AI code tools:
 
 - Claude Code
 - Cursor
 - OpenCode
+- Codex
+- Gemini CLI
+- GitHub Copilot
+- Cline
+- Kimi
+
+By default the skill is installed to your **user-global** directory so it is
+available from any project. Pass `--project` to install into the current
+project instead.
 
 Install SKILL.md:
 
 ```bash
-open-bookmark skill install
+open-bookmark skill install            # user-global (default)
+open-bookmark skill install --project  # current project
 ```
 
 Generate SKILL.md locally:

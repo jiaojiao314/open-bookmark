@@ -205,6 +205,34 @@ export async function graphExport(options: GraphOptions = {}): Promise<void> {
   console.log(json)
 }
 
+/** Export the knowledge graph as a self-contained HTML dashboard */
+export async function graphDashboard(
+  options: GraphOptions & { output?: string } = {}
+): Promise<void> {
+  const { writeFile } = await import('node:fs/promises')
+  const { buildDashboardData, renderDashboardHtml } = await import('./dashboard.js')
+
+  const stateDir = options.stateDir || process.cwd() + '/open-bookmark'
+  const graphPath = stateDir + '/bookmark-graph.json'
+  const outPath = options.output || stateDir + '/dashboard.html'
+
+  console.log('📊 生成知识图谱 Dashboard')
+
+  const graph = await loadKnowledgeGraph(graphPath)
+  if (!graph) {
+    console.error('❌ 未找到知识图谱，请先运行 graph init')
+    return
+  }
+
+  const data = buildDashboardData(graph)
+  const html = renderDashboardHtml(data)
+  await writeFile(outPath, html, 'utf-8')
+
+  console.log(`   ✅ ${data.meta.nodeCount} 节点 · ${data.meta.edgeCount} 边`)
+  console.log(`   📄 ${outPath}`)
+  console.log('   在浏览器中打开即可查看（离线可用，无需服务器）')
+}
+
 /** Generate rules from knowledge graph */
 export async function graphRules(options: GraphOptions = {}): Promise<void> {
   const stateDir = options.stateDir || process.cwd() + '/open-bookmark'

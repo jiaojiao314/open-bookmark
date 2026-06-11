@@ -26,7 +26,7 @@ import { evaluateCommand } from '../commands/evaluate.js'
 import { feedbackCommand } from '../commands/feedback.js'
 import { optimizeCommand } from '../commands/optimize.js'
 import { showLogo, showDisclaimer, showBackupNotice } from '../ui/logo.js'
-import { graphInit, graphUpdate, graphQuery, graphStats, graphExport, graphRules, graphTour, graphClassify } from '../graph/commands.js'
+import { graphInit, graphUpdate, graphQuery, graphStats, graphExport, graphDashboard, graphRules, graphTour, graphClassify } from '../graph/commands.js'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
@@ -686,9 +686,10 @@ const skillCmd = program
 skillCmd
   .command('install')
   .description('Install SKILL.md to detected platforms')
-  .action(async () => {
+  .option('--project', 'Install to the current project instead of user-global')
+  .action(async (options: { project?: boolean }) => {
     try {
-      await skillCommand({ install: true })
+      await skillCommand({ install: true, project: options.project })
     } catch (error) {
       console.error('❌ SKILL.md 安装失败:', error)
       process.exit(1)
@@ -811,6 +812,20 @@ graphCmd
       await graphExport({ stateDir })
     } catch (error) {
       console.error('❌ 知识图谱导出失败:', error)
+      process.exit(1)
+    }
+  })
+
+graphCmd
+  .command('dashboard')
+  .description('Generate a self-contained HTML dashboard of the knowledge graph')
+  .option('-o, --output <file>', 'Output HTML file path')
+  .action(async (options: { output?: string }) => {
+    try {
+      const stateDir = getStateDir(program.opts())
+      await graphDashboard({ stateDir, output: options.output })
+    } catch (error) {
+      console.error('❌ Dashboard 生成失败:', error)
       process.exit(1)
     }
   })

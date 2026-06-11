@@ -3,7 +3,8 @@
  */
 
 import { writeFile, mkdir } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
+import { resolveSkillDir, SKILL_NAME } from './config.js'
 import type { PlatformConfig } from './config.js'
 
 /** Generate SKILL.md content */
@@ -205,18 +206,23 @@ Rules are stored in \`open-bookmark/classification-rules.yaml\`:
 
 }
 
-/** Save SKILL.md for a platform */
+/** Save SKILL.md for a platform.
+ *
+ * - `project` selects project-level vs user-global install location.
+ * - `style: 'folder'` nests the skill inside a folder named after the skill
+ *   (`<dir>/open-bookmark/<file>`); `'per-skill'` drops the file directly in.
+ */
 export async function saveSkillForPlatform(
   platform: PlatformConfig,
-  rootDir: string
+  rootDir: string,
+  project = false
 ): Promise<string> {
-  const skillDir = join(rootDir, platform.skillDir)
+  const baseDir = resolveSkillDir(platform, project, rootDir)
+  const skillDir = platform.style === 'folder' ? join(baseDir, SKILL_NAME) : baseDir
   const skillPath = join(skillDir, platform.skillFileName)
 
-  // Ensure directory exists
   await mkdir(skillDir, { recursive: true })
 
-  // Generate and save content
   const content = generateSkillContent()
   await writeFile(skillPath, content, 'utf-8')
 
@@ -226,12 +232,13 @@ export async function saveSkillForPlatform(
 /** Save SKILL.md for all detected platforms */
 export async function saveSkillForAllPlatforms(
   platforms: Array<{ config: PlatformConfig }>,
-  rootDir: string
+  rootDir: string,
+  project = false
 ): Promise<string[]> {
   const savedPaths: string[] = []
 
   for (const platform of platforms) {
-    const path = await saveSkillForPlatform(platform.config, rootDir)
+    const path = await saveSkillForPlatform(platform.config, rootDir, project)
     savedPaths.push(path)
   }
 

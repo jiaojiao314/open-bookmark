@@ -5,3 +5,5 @@ open-bookmark/
 .DS_Store
 .opencode/
 openspec/
+.mimocode/
+.understand-anything/

@@ -18,13 +18,29 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest",
-    "prepublishOnly": "npm run build"
+    "test:run": "vitest run",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build && changeset publish",
+    "prepublishOnly": "npm run build && npm run test:run"
   },
-  "keywords": ["bookmark", "browser", "chrome", "ai-agent", "skill", "bookmark-management", "classification", "multi-agent"],
+  "keywords": [
+    "bookmark",
+    "browser",
+    "chrome",
+    "ai-agent",
+    "skill",
+    "bookmark-management",
+    "classification",
+    "multi-agent"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -35,13 +51,15 @@
   },
   "homepage": "https://github.com/jiaojiao314/open-bookmark#readme",
   "dependencies": {
-    "commander": "^14.0.0",
     "@inquirer/prompts": "^8.4.3",
+    "commander": "^14.0.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "@types/node": "^24.2.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.6"
   }
 }
